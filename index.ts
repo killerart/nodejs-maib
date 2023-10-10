@@ -35,10 +35,16 @@ class MaibCommand {
 
   constructor(private readonly maib: MAIB) {}
 
-  private async request(payload: Record<string, string | number>) {
-    const query = Object.keys(payload)
+  private async request(payload: Record<string, string | number | undefined>) {
+    const query = (
+      Object.entries(payload).filter(entry => entry[1] !== undefined) as [
+        string,
+        string | number
+      ][]
+    )
       .map(
-        key => `${encodeURIComponent(key)}=${encodeURIComponent(payload[key])}`
+        entry =>
+          `${encodeURIComponent(entry[0])}=${encodeURIComponent(entry[1])}`
       )
       .join('&');
 
@@ -110,9 +116,6 @@ class MaibCommand {
     if (this._clientIpAddress === undefined) {
       throw new Error('_clientIpAddress is undefined');
     }
-    if (this._description === undefined) {
-      throw new Error('_description is undefined');
-    }
     if (this._language === undefined) {
       throw new Error('_language is undefined');
     }
@@ -130,9 +133,13 @@ class MaibCommand {
   }
 
   public async getTransactionStatus(transactionId: string) {
+    if (this._clientIpAddress === undefined) {
+      throw new Error('_clientIpAddress is undefined');
+    }
     const payload = {
       command: 'c',
-      trans_id: transactionId
+      trans_id: transactionId,
+      client_ip_addr: this._clientIpAddress
     };
 
     return await this.request(payload);
@@ -147,9 +154,6 @@ class MaibCommand {
     }
     if (this._clientIpAddress === undefined) {
       throw new Error('_clientIpAddress is undefined');
-    }
-    if (this._description === undefined) {
-      throw new Error('_description is undefined');
     }
     if (this._language === undefined) {
       throw new Error('_language is undefined');
@@ -173,9 +177,6 @@ class MaibCommand {
     }
     if (this._clientIpAddress === undefined) {
       throw new Error('_clientIpAddress is undefined');
-    }
-    if (this._description === undefined) {
-      throw new Error('_description is undefined');
     }
     const payload = {
       command: 'p',
@@ -222,9 +223,6 @@ class MaibCommand {
     }
     if (this._clientIpAddress === undefined) {
       throw new Error('_clientIpAddress is undefined');
-    }
-    if (this._description === undefined) {
-      throw new Error('_description is undefined');
     }
     const payload = {
       command: 'e',
